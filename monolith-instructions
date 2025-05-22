@@ -1,0 +1,94 @@
+# Monolithic Application Migration to Cloud
+
+## Application Components
+
+- **Catalogue**: Product details (name, price, etc.)
+- **User**: User registration and login workflows
+- **Cart**: Products added to cart by users
+- **Orders**: Order details placed by users
+- **Payment**: Payment details for orders
+
+## Migration Strategy
+
+The goal is to convert the monolith into independent microservices. Components will be extracted in the following order to maintain application integrity:
+
+1. Payment
+2. Orders
+3. Cart
+4. User
+5. Catalogue
+
+This order is chosen due to MySQL table dependencies and joins in the monolithic system.
+
+## Deployment Instructions
+
+### Step 1: EC2 Instance Setup
+
+1. Provision EC2 instance with Amazon Linux 2 AMI
+2. Open ports 22, 3306, 5000 from any source (0.0.0.0/0)
+3. Name instance "monolith"
+4. SSH into instance
+
+### Step 2: MySQL Installation
+
+```bash
+sudo yum update -y
+sudo yum install -y mariadb-server
+sudo systemctl enable mariadb
+sudo systemctl start mariadb
+sudo mysql_secure_installation
+```
+
+MySQL secure installation options:
+- Initial password: [blank]
+- Set root password: Y
+- Remove anonymous users: Y
+- Disallow root login remotely: n
+- Remove test database: n
+- Reload privilege tables: Y
+
+Configure MySQL:
+```bash
+sudo vi /etc/my.cnf
+# Add in line 2:
+bind-address=0.0.0.0
+
+mysql -uroot -p
+# Enter password when prompted
+GRANT ALL PRIVILEGES ON *.* TO 'user'@'%' IDENTIFIED BY '<password>';
+```
+
+### Step 3: Database Setup
+
+1. Connect to server using MySQL Workbench
+2. Copy and run script from:
+   ```
+   https://github.com/pravinmenghani1/breaking-monolith-to-microservices/blob/main/db.sql
+   ```
+
+### Step 4: Application Deployment
+
+```bash
+yum install git -y
+git clone <code-shared-by-pravin>
+cd monolith
+
+# Update config.py with password
+
+yum install python3
+yum install mysql-devel gcc gcc-devel python3-devel
+easy_install mysql-python
+pip3 install -r requirements.txt
+python3 run.py
+```
+
+Access application at:
+```
+http://<Public IP of EC2>:5000/
+```
+
+The application now supports:
+- User registration
+- Login
+- Add to Cart
+- Place Order functionality
