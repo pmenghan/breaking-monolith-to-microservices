@@ -70,7 +70,7 @@ GRANT ALL PRIVILEGES ON *.* TO 'user'@'%' IDENTIFIED BY '<password>';
 
 ```bash
 yum install git -y
-git clone <code-shared-by-pravin>
+git clone https://github.com/pravinmenghani1/breaking-monolith-to-microservices/blob/main/monolith-main.zip
 cd monolith
 
 # Update config.py with password
